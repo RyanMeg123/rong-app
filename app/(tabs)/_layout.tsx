@@ -1,33 +1,74 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { theme } from '@/constants/theme';
+
+type TabIconName = keyof typeof Ionicons.glyphMap;
+
+function TabIcon({ color, name }: { color: string; name: TabIconName }) {
+  return <Ionicons color={color} name={name} size={18} />;
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSub,
+        tabBarStyle: {
+          position: 'absolute',
+          height: 74,
+          left: 14,
+          right: 14,
+          bottom: 14,
+          paddingTop: 8,
+          paddingBottom: 10,
+          borderRadius: 28,
+          borderWidth: 1.5,
+          borderColor: theme.colors.line,
+          backgroundColor: theme.colors.bgCard,
+          shadowColor: '#8b5a2b',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 18,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          marginTop: 2,
+          fontWeight: '500',
+        },
+        tabBarItemStyle: {
+          paddingTop: 4,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: '首页',
+          tabBarIcon: ({ color }) => <TabIcon color={color} name="home-outline" />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="messages"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: '对话',
+          tabBarIcon: ({ color }) => <TabIcon color={color} name="chatbubble-outline" />,
+        }}
+      />
+      <Tabs.Screen
+        name="collection"
+        options={{
+          title: '记忆',
+          tabBarIcon: ({ color }) => <TabIcon color={color} name="star-outline" />,
+        }}
+      />
+      <Tabs.Screen
+        name="me"
+        options={{
+          title: '我的',
+          tabBarIcon: ({ color }) => <TabIcon color={color} name="person-outline" />,
         }}
       />
     </Tabs>
