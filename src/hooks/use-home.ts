@@ -1,10 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { homeService } from '@/services/home.service';
-
-import { useAsyncData } from './use-async-data';
+import { HOME_DATA } from '@/data/mock-data';
 
 export function useHome() {
-  const loader = useCallback(() => homeService.getHome(), []);
-  return useAsyncData(loader);
+  const reload = useCallback(async () => {}, []);
+
+  return useMemo(
+    () => ({
+      data: HOME_DATA,
+      error: null,
+      isLoading: false,
+      reload,
+    }),
+    [reload],
+  );
 }

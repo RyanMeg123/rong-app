@@ -6,24 +6,27 @@ import {
   type PropsWithChildren,
 } from 'react';
 
-import { ROLE_OPTIONS } from '@/data/mock-data';
-
 interface AppStateContextValue {
-  selectedRoleId: string;
-  setSelectedRoleId: (roleId: string) => void;
+  selectedRoleId: string | null;
+  setSelectedRoleId: (roleId: string | null) => void;
+  hasCompletedRoleSelection: boolean;
+  completeRoleSelection: () => void;
 }
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 export function AppStateProvider({ children }: PropsWithChildren) {
-  const [selectedRoleId, setSelectedRoleId] = useState(ROLE_OPTIONS[0]?.id ?? 'rabbit');
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+  const [hasCompletedRoleSelection, setHasCompletedRoleSelection] = useState(false);
 
   const value = useMemo(
     () => ({
       selectedRoleId,
       setSelectedRoleId,
+      hasCompletedRoleSelection,
+      completeRoleSelection: () => setHasCompletedRoleSelection(true),
     }),
-    [selectedRoleId],
+    [hasCompletedRoleSelection, selectedRoleId],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

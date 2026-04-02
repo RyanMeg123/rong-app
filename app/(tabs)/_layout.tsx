@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 
 import { theme } from '@/constants/theme';
+import { useAppState } from '@/providers/app-state-provider';
 
 type TabIconName = keyof typeof Ionicons.glyphMap;
 
@@ -10,6 +11,12 @@ function TabIcon({ color, name }: { color: string; name: TabIconName }) {
 }
 
 export default function TabLayout() {
+  const { hasCompletedRoleSelection } = useAppState();
+
+  if (!hasCompletedRoleSelection) {
+    return <Redirect href="/role-selection" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -35,9 +42,9 @@ export default function TabLayout() {
           elevation: 8,
         },
         tabBarLabelStyle: {
+          fontFamily: theme.fonts.primary,
           fontSize: 10,
           marginTop: 2,
-          fontWeight: '500',
         },
         tabBarItemStyle: {
           paddingTop: 4,

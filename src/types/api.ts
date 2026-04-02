@@ -4,6 +4,8 @@ export interface RoleCardData {
   title: string;
   description: string;
   image: number;
+  video?: number;
+  selectedVideo?: number;
   accent: string;
 }
 

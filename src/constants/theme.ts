@@ -1,6 +1,11 @@
 import { Platform } from 'react-native';
 
+const appFontFamily = 'LemiBoBoTi';
+
 export const theme = {
+  fonts: {
+    primary: appFontFamily,
+  },
   colors: {
     primary: '#F5A43A',
     primarySoft: '#FFDDA3',
@@ -32,34 +37,34 @@ export const theme = {
   },
   typography: {
     headingXL: {
+      fontFamily: appFontFamily,
       fontSize: 30,
       lineHeight: 36,
-      fontWeight: '700' as const,
     },
     headingLG: {
+      fontFamily: appFontFamily,
       fontSize: 24,
       lineHeight: 30,
-      fontWeight: '700' as const,
     },
     headingMD: {
+      fontFamily: appFontFamily,
       fontSize: 18,
       lineHeight: 24,
-      fontWeight: '600' as const,
     },
     bodyLG: {
+      fontFamily: appFontFamily,
       fontSize: 17,
       lineHeight: 24,
-      fontWeight: '400' as const,
     },
     bodyMD: {
+      fontFamily: appFontFamily,
       fontSize: 15,
       lineHeight: 22,
-      fontWeight: '400' as const,
     },
     caption: {
+      fontFamily: appFontFamily,
       fontSize: 13,
       lineHeight: 18,
-      fontWeight: '400' as const,
     },
   },
   shadow: {

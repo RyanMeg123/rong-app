@@ -7,13 +7,19 @@ import { theme } from '@/constants/theme';
 interface AppScreenProps extends PropsWithChildren {
   scrollable?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  decorativeBackground?: boolean;
 }
 
-export function AppScreen({ children, scrollable = false, contentStyle }: AppScreenProps) {
+export function AppScreen({
+  children,
+  scrollable = false,
+  contentStyle,
+  decorativeBackground = true,
+}: AppScreenProps) {
   return (
     <View style={styles.background}>
-      <View style={styles.skyGlow} />
-      <View style={styles.bottomGlow} />
+      {decorativeBackground ? <View style={styles.skyGlow} /> : null}
+      {decorativeBackground ? <View style={styles.bottomGlow} /> : null}
       <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
         {scrollable ? (
           <ScrollView contentContainerStyle={[styles.scrollContent, contentStyle]} showsVerticalScrollIndicator={false}>
