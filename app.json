@@ -9,7 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "deploymentTarget": "15.4",
+      "bundleIdentifier": "com.ryanmkui.rong-game-app"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+      "@lottiefiles/dotlottie-react-native/plugin",
       [
         "expo-splash-screen",
         {

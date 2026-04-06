@@ -9,7 +9,8 @@ import { theme } from '@/constants/theme';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    LemiBoBoTi: require('../assets/fonts/乐米波波体/乐米波波体.ttf'),
+    LemiBoBoTi: require('../assets/fonts/runtime/LemiBoBoTi.ttf'),
+    BubblegumSans: require('../assets/fonts/runtime/BubblegumSans-Regular.ttf'),
   });
 
   if (!fontsLoaded) {
@@ -19,7 +20,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" backgroundColor={theme.colors.bg} />
+        <StatusBar style="dark" backgroundColor={theme.colors.bg} />
         <Stack
           screenOptions={{
             animation: 'none',
