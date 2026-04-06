@@ -1,13 +1,5 @@
-import { Redirect } from 'expo-router';
-
-import { useAppState } from '@/providers/app-state-provider';
+import { SplashScreen } from '@/components/features/splash/splash-screen';
 
 export default function IndexScreen() {
-  const { hasCompletedRoleSelection } = useAppState();
-
-  if (hasCompletedRoleSelection) {
-    return <Redirect href="/(tabs)" />;
-  }
-
-  return <Redirect href="/loading" />;
+  return <SplashScreen />;
 }

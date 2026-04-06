@@ -6,7 +6,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
 import { theme } from '@/constants/theme';
-import { AppStateProvider } from '@/providers/app-state-provider';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -20,22 +19,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AppStateProvider>
-          <StatusBar style="dark" backgroundColor={theme.colors.bg} />
-          <Stack
-            screenOptions={{
-              animation: 'none',
-              headerShown: false,
-              contentStyle: { backgroundColor: theme.colors.bg },
-            }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="loading" />
-            <Stack.Screen name="role-selection" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="conversation" />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          </Stack>
-        </AppStateProvider>
+        <StatusBar style="light" backgroundColor={theme.colors.bg} />
+        <Stack
+          screenOptions={{
+            animation: 'none',
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.colors.bg },
+          }}>
+          <Stack.Screen name="index" />
+        </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -1,6 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { useEventListener } from 'expo';
-import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { Animated, StyleSheet, Text, View } from 'react-native';
@@ -14,10 +12,9 @@ const splashTitleChars = [...splashTitle];
 
 export function SplashScreen() {
   const charAnimations = useRef(splashTitleChars.map(() => new Animated.Value(0))).current;
-  const hasNavigatedRef = useRef(false);
 
   const player = useVideoPlayer(landingVideo, (videoPlayer) => {
-    videoPlayer.loop = false;
+    videoPlayer.loop = true;
     videoPlayer.muted = true;
     videoPlayer.play();
   });
@@ -42,15 +39,6 @@ export function SplashScreen() {
       charAnimations.forEach((value) => value.setValue(0));
     };
   }, [charAnimations]);
-
-  useEventListener(player, 'playToEnd', () => {
-    if (hasNavigatedRef.current) {
-      return;
-    }
-
-    hasNavigatedRef.current = true;
-    router.replace('/role-selection');
-  });
 
   return (
     <View style={styles.screen}>
