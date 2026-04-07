@@ -33,7 +33,9 @@ export function CompanionSelectionScreen() {
 
   const swipeX = useRef(new Animated.Value(0)).current;
   const currentCompanion = companions[currentIndex];
-  const neighborIndex = wrapIndex(currentIndex + (dragDirection > 0 ? -1 : 1));
+  const previewIndex = wrapIndex(currentIndex + (dragDirection > 0 ? -1 : 1));
+  const previewCompanion = companions[previewIndex];
+  const liked = likedIds[currentCompanion.id] ?? false;
 
   const cardWidth = screenWidth - 44;
   const heroHeight = Math.min(Math.max(cardWidth * 0.92, 300), 390);
@@ -72,7 +74,9 @@ export function CompanionSelectionScreen() {
           return isHorizontal;
         },
         onPanResponderMove: (_, gestureState) => {
-          setDragDirection(gestureState.dx > 0 ? 1 : -1);
+          if (gestureState.dx !== 0) {
+            setDragDirection(gestureState.dx > 0 ? 1 : -1);
+          }
           swipeX.setValue(gestureState.dx);
         },
         onPanResponderRelease: (_, gestureState) => {
@@ -148,17 +152,6 @@ export function CompanionSelectionScreen() {
     });
   };
 
-  const visibleCards = companions
-    .map((companion, index) => ({
-      companion,
-      index,
-      isActive: index === currentIndex,
-      isNeighbor: index === neighborIndex && index !== currentIndex,
-    }))
-    .filter((item) => item.isActive || item.isNeighbor)
-    // 保证 active 卡最后渲染，在视觉上永远处于最上层
-    .sort((a, b) => (a.isActive ? 1 : b.isActive ? -1 : 0));
-
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -186,52 +179,44 @@ export function CompanionSelectionScreen() {
         <Text style={styles.subtitle}>在这里，每一份情绪都会被温柔地接住</Text>
 
         <View style={styles.stackWrap}>
-          {visibleCards.map(({ companion, index, isNeighbor }) => {
-            if (isNeighbor) {
-              return (
-                <Animated.View
-                  key={companion.id}
-                  pointerEvents="none"
-                  style={[
-                    styles.previewCard,
-                    {
-                      opacity: previewCardOpacity,
-                      transform: [{ scale: previewCardScale }, { translateY: previewCardTranslate }],
-                    },
-                  ]}>
-                  <View style={[styles.previewCardClip, { height: heroHeight + 68 }]}>
-                    <CompanionCard
-                      companion={companion}
-                      heroHeight={heroHeight}
-                      isPreview
-                      lottieStyle={lottieFrameStyle}
-                      overlapOffset={infoPanelOverlap}
-                      style={styles.previewCardInner}
-                    />
-                  </View>
-                </Animated.View>
-              );
-            }
-
-            return (
+          <Animated.View
+            key={`preview-${previewCompanion.id}-${dragDirection}`}
+            pointerEvents="none"
+            style={[
+              styles.previewCard,
+              {
+                opacity: previewCardOpacity,
+                transform: [{ scale: previewCardScale }, { translateY: previewCardTranslate }],
+              },
+            ]}>
+            <View style={[styles.previewCardClip, { height: heroHeight + 68 }]}>
               <CompanionCard
-                key={companion.id}
-                companion={companion}
+                companion={previewCompanion}
                 heroHeight={heroHeight}
-                liked={likedIds[companion.id] ?? false}
+                isPreview
                 lottieStyle={lottieFrameStyle}
-                onToggleLiked={index === currentIndex ? toggleLiked : undefined}
-                panHandlers={index === currentIndex ? panResponder.panHandlers : undefined}
                 overlapOffset={infoPanelOverlap}
-                style={[
-                  styles.activeCard,
-                  {
-                    transform: [{ translateX: swipeX }, { rotate: topCardRotate }],
-                  },
-                ]}
+                style={styles.previewCardInner}
               />
-            );
-          })}
+            </View>
+          </Animated.View>
+
+          <CompanionCard
+            key={`active-${currentCompanion.id}`}
+            companion={currentCompanion}
+            heroHeight={heroHeight}
+            liked={liked}
+            lottieStyle={lottieFrameStyle}
+            onToggleLiked={toggleLiked}
+            panHandlers={panResponder.panHandlers}
+            overlapOffset={infoPanelOverlap}
+            style={[
+              styles.activeCard,
+              {
+                transform: [{ translateX: swipeX }, { rotate: topCardRotate }],
+              },
+            ]}
+          />
         </View>
 
         <View style={styles.swipeHintRow}>
