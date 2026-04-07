@@ -1,20 +1,35 @@
 import { Platform } from 'react-native';
 
+const appFontFamily = 'LemiBoBoTi';
+
 export const theme = {
+  fonts: {
+    primary: appFontFamily,
+    accent: 'BubblegumSans',
+    body: Platform.select({
+      ios: 'PingFang SC',
+      android: 'sans-serif',
+      default: 'System',
+    }),
+  },
   colors: {
-    primary: '#F5A43A',
-    primarySoft: '#FFDDA3',
-    bg: '#F8F3E8',
-    bgCard: '#FFF8EE',
-    textMain: '#5D4636',
-    textSub: '#8B7764',
-    line: '#6F5847',
-    leaf: '#A8D98D',
-    sky: '#A9D9F0',
-    petal: '#F3C7D7',
+    primary: '#FF8E8B',
+    primarySoft: '#FFD7C6',
+    bg: '#FFF8F4',
+    bgCard: '#FFFFFF',
+    textMain: '#4C352F',
+    textSub: '#8C756F',
+    line: '#EAD7CF',
+    lineStrong: '#B4584F',
+    leaf: '#8EE0BD',
+    sky: '#9FBEFF',
+    petal: '#FAD8BF',
     warn: '#E9917C',
+    cream: '#FFF5D6',
+    mint: '#D8F1E9',
+    panel: '#F9F3EE',
     white: '#FFFFFF',
-    shadow: '#A67736',
+    shadow: '#D7B6AA',
   },
   spacing: {
     xs: 4,
@@ -32,34 +47,34 @@ export const theme = {
   },
   typography: {
     headingXL: {
+      fontFamily: appFontFamily,
       fontSize: 30,
       lineHeight: 36,
-      fontWeight: '700' as const,
     },
     headingLG: {
+      fontFamily: appFontFamily,
       fontSize: 24,
       lineHeight: 30,
-      fontWeight: '700' as const,
     },
     headingMD: {
+      fontFamily: appFontFamily,
       fontSize: 18,
       lineHeight: 24,
-      fontWeight: '600' as const,
     },
     bodyLG: {
+      fontFamily: appFontFamily,
       fontSize: 17,
       lineHeight: 24,
-      fontWeight: '400' as const,
     },
     bodyMD: {
+      fontFamily: appFontFamily,
       fontSize: 15,
       lineHeight: 22,
-      fontWeight: '400' as const,
     },
     caption: {
+      fontFamily: appFontFamily,
       fontSize: 13,
       lineHeight: 18,
-      fontWeight: '400' as const,
     },
   },
   shadow: {
