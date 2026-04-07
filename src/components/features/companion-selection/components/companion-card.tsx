@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DotLottie } from '@lottiefiles/dotlottie-react-native';
-import { Animated, PanResponderInstance, Pressable, StyleProp, Text, View, ViewStyle } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { theme } from '@/constants/theme';
 
@@ -13,8 +13,6 @@ type CompanionCardProps = {
   lottieStyle: ViewStyle;
   liked?: boolean;
   onToggleLiked?: () => void;
-  panHandlers?: PanResponderInstance['panHandlers'];
-  style?: StyleProp<ViewStyle>;
   isPreview?: boolean;
   overlapOffset: number;
 };
@@ -26,13 +24,12 @@ export function CompanionCard({
   liked = false,
   lottieStyle,
   onToggleLiked,
-  panHandlers,
   overlapOffset,
-  style,
 }: CompanionCardProps) {
   return (
-    <Animated.View {...panHandlers} style={style}>
+    <View style={[StyleSheet.absoluteFill, cardStyles.root]}>
       <View style={styles.companionCard}>
+        {/* Hero area: lottie contained within, overflow clipped to card */}
         <View style={[styles.heroStage, { height: heroHeight }]}>
           <DotLottie autoplay loop source={companion.animationSource} style={lottieStyle} />
         </View>
@@ -44,11 +41,19 @@ export function CompanionCard({
         ) : null}
 
         {!isPreview ? (
-          <Pressable accessibilityRole="button" onPress={onToggleLiked} style={styles.favoriteButton}>
-            <Ionicons color={theme.colors.white} name={liked ? 'heart' : 'heart-outline'} size={28} />
+          <Pressable
+            accessibilityRole="button"
+            onPress={onToggleLiked}
+            style={styles.favoriteButton}>
+            <Ionicons
+              color={theme.colors.white}
+              name={liked ? 'heart' : 'heart-outline'}
+              size={24}
+            />
           </Pressable>
         ) : null}
 
+        {/* Info panel: header fixed, description scrollable */}
         <View style={[styles.infoPanel, { marginTop: -overlapOffset }]}>
           <View style={styles.infoHeader}>
             <View style={styles.identityWrap}>
@@ -65,9 +70,23 @@ export function CompanionCard({
             </View>
           </View>
 
-          <Text style={styles.description}>{companion.description}</Text>
+          {/* Scrollable description — finger can scroll text without triggering card swipe */}
+          <ScrollView
+            bounces={false}
+            nestedScrollEnabled
+            scrollEnabled={!isPreview}
+            showsVerticalScrollIndicator={false}
+            style={styles.descriptionScroll}>
+            <Text style={styles.description}>{companion.description}</Text>
+          </ScrollView>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
+
+const cardStyles = StyleSheet.create({
+  root: {
+    justifyContent: 'flex-start',
+  },
+});

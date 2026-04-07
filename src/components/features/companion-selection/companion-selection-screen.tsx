@@ -1,140 +1,79 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Animated,
-  PanResponder,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-  useWindowDimensions,
-} from 'react-native';
+import { useCallback, useState } from 'react';
+import { Pressable, StyleSheet, Text, View, ViewStyle, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 
 import { theme } from '@/constants/theme';
 
 import { CompanionCard } from './components/companion-card';
-import { companions, swipeThreshold, wrapIndex } from './companion-selection.data';
+import { SwipeableCard } from './components/swipeable-card';
+import { companions, wrapIndex } from './companion-selection.data';
 import { styles } from './companion-selection.styles';
 
 export function CompanionSelectionScreen() {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [dragDirection, setDragDirection] = useState<-1 | 0 | 1>(0);
-  const [scrollEnabled, setScrollEnabled] = useState(true);
   const [likedIds, setLikedIds] = useState<Record<string, boolean>>({
     [companions[0].id]: true,
     [companions[1].id]: false,
   });
 
-  const swipeX = useRef(new Animated.Value(0)).current;
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
   const currentCompanion = companions[currentIndex];
-  const previewIndex = wrapIndex(currentIndex + (dragDirection > 0 ? -1 : 1));
-  const previewCompanion = companions[previewIndex];
+  const nextCompanion = companions[wrapIndex(currentIndex + 1)];
   const liked = likedIds[currentCompanion.id] ?? false;
 
-  const cardWidth = screenWidth - 44;
-  const heroHeight = Math.min(Math.max(cardWidth * 0.92, 300), 390);
-  const infoPanelOverlap = Math.min(Math.round(heroHeight * 0.28), 116);
-  const lottieFrameStyle = useMemo<ViewStyle>(
-    () =>
-      StyleSheet.flatten<ViewStyle>([
-        styles.heroLottie,
-        {
-          width: cardWidth,
-          height: heroHeight + 80,
-          left: 0,
-          top: -Math.round(heroHeight * 0.18),
-        },
-      ]),
-    [cardWidth, heroHeight]
-  );
+  // Card area: full width, sits between title and bottom chrome
+  const cardAreaHeight = Math.max(screenHeight * 0.56, 320);
+  const cardWidth = screenWidth; // full bleed
 
-  const advanceCard = useCallback(
+  // Hero stage takes top portion of card; info panel overlaps from below
+  const heroHeight = Math.round(cardAreaHeight * 0.56);
+  const infoPanelOverlap = Math.round(heroHeight * 0.24);
+
+  // Lottie is positioned absolute relative to companionCard.
+  // It extends ~42% below the heroStage so the character's face shows
+  // in the hero area and hands peek over the white info panel.
+  const lottieStyle: ViewStyle = {
+    position: 'absolute',
+    width: cardWidth,
+    height: heroHeight * 1.42,
+    left: 0,
+    top: 0,
+  };
+
+  // Behind card animates up / scales in as top card is dragged
+  const behindStyle = useAnimatedStyle(() => {
+    const drag = Math.abs(translateX.value);
+    const progress = Math.min(drag / 80, 1);
+    return {
+      transform: [
+        { scale: interpolate(progress, [0, 1], [0.93, 1.0]) },
+        { translateY: interpolate(progress, [0, 1], [18, 0]) },
+      ],
+      opacity: interpolate(progress, [0, 0.5], [0.68, 1.0]),
+    };
+  });
+
+  const handleSwipe = useCallback(
     (direction: 1 | -1) => {
-      setCurrentIndex((prev) => wrapIndex(prev + (direction > 0 ? 1 : -1)));
-      setDragDirection(0);
-      swipeX.setValue(0);
+      // Reset shared values first so the incoming card starts at origin
+      translateX.value = 0;
+      translateY.value = 0;
+      // direction > 0 = right swipe → previous; direction < 0 = left swipe → next
+      setCurrentIndex((prev) => wrapIndex(prev + (direction > 0 ? -1 : 1)));
     },
-    [swipeX]
+    [translateX, translateY]
   );
-
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gestureState) => {
-          const isHorizontal =
-            Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-          if (isHorizontal) setScrollEnabled(false);
-          return isHorizontal;
-        },
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dx !== 0) {
-            setDragDirection(gestureState.dx > 0 ? 1 : -1);
-          }
-          swipeX.setValue(gestureState.dx);
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          setScrollEnabled(true);
-          if (gestureState.dx <= -swipeThreshold) {
-            Animated.timing(swipeX, {
-              toValue: -420,
-              duration: 180,
-              useNativeDriver: true,
-            }).start(() => advanceCard(1));
-            return;
-          }
-
-          if (gestureState.dx >= swipeThreshold) {
-            Animated.timing(swipeX, {
-              toValue: 420,
-              duration: 180,
-              useNativeDriver: true,
-            }).start(() => advanceCard(-1));
-            return;
-          }
-
-          Animated.spring(swipeX, {
-            toValue: 0,
-            friction: 7,
-            tension: 80,
-            useNativeDriver: true,
-          }).start(() => setDragDirection(0));
-        },
-        onPanResponderTerminate: () => {
-          setScrollEnabled(true);
-          Animated.spring(swipeX, {
-            toValue: 0,
-            friction: 7,
-            tension: 80,
-            useNativeDriver: true,
-          }).start(() => setDragDirection(0));
-        },
-      }),
-    [advanceCard, swipeX]
-  );
-
-  const topCardRotate = swipeX.interpolate({
-    inputRange: [-240, 0, 240],
-    outputRange: ['-10deg', '0deg', '10deg'],
-  });
-  const previewCardScale = swipeX.interpolate({
-    inputRange: [-180, 0, 180],
-    outputRange: [0.98, 0.94, 0.98],
-  });
-  const previewCardTranslate = swipeX.interpolate({
-    inputRange: [-180, 0, 180],
-    outputRange: [0, 18, 0],
-  });
-  const previewCardOpacity = swipeX.interpolate({
-    inputRange: [-120, 0, 120],
-    outputRange: [1, 0.88, 1],
-  });
 
   const toggleLiked = () => {
     setLikedIds((prev) => ({
@@ -146,94 +85,94 @@ export function CompanionSelectionScreen() {
   const openCompanion = () => {
     router.push({
       pathname: '/companion',
-      params: {
-        companionId: currentCompanion.id,
-      },
+      params: { companionId: currentCompanion.id },
     });
   };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <StatusBar style="dark" />
-      <View style={styles.background}>
+
+      {/* Ambient glow background */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <View style={styles.glowTop} />
         <View style={styles.glowBottom} />
       </View>
 
-      <ScrollView bounces={false} contentContainerStyle={styles.content} scrollEnabled={scrollEnabled} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Pressable accessibilityRole="button" style={styles.headerButton}>
-            <Feather color={theme.colors.lineStrong} name="chevron-left" size={22} />
-          </Pressable>
-
-          <View style={styles.brandWrap}>
-            <Text style={styles.brand}>绒绒树洞</Text>
-          </View>
-
-          <Pressable accessibilityRole="button" style={styles.headerIconButton}>
-            <Feather color={theme.colors.lineStrong} name="image" size={17} />
-          </Pressable>
+      {/* ── Header ── */}
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" style={styles.headerButton}>
+          <Feather color={theme.colors.lineStrong} name="chevron-left" size={22} />
+        </Pressable>
+        <View style={styles.brandWrap}>
+          <Text style={styles.brand}>绒绒树洞</Text>
         </View>
+        <Pressable accessibilityRole="button" style={styles.headerIconButton}>
+          <Feather color={theme.colors.lineStrong} name="image" size={17} />
+        </Pressable>
+      </View>
 
+      {/* ── Title ── */}
+      <View style={styles.titleSection}>
         <Text style={styles.title}>选一位伙伴陪你吧</Text>
         <Text style={styles.subtitle}>在这里，每一份情绪都会被温柔地接住</Text>
+      </View>
 
-        <View style={styles.stackWrap}>
-          <Animated.View
-            key={`preview-${previewCompanion.id}-${dragDirection}`}
-            pointerEvents="none"
-            style={[
-              styles.previewCard,
-              {
-                opacity: previewCardOpacity,
-                transform: [{ scale: previewCardScale }, { translateY: previewCardTranslate }],
-              },
-            ]}>
-            <View style={[styles.previewCardClip, { height: heroHeight + 68 }]}>
-              <CompanionCard
-                companion={previewCompanion}
-                heroHeight={heroHeight}
-                isPreview
-                lottieStyle={lottieFrameStyle}
-                overlapOffset={infoPanelOverlap}
-                style={styles.previewCardInner}
-              />
-            </View>
-          </Animated.View>
-
+      {/* ── Card Stack ── */}
+      <View style={[styles.stackSection, { height: cardAreaHeight }]}>
+        {/* Behind card — non-interactive, animates in sync with drag */}
+        <Animated.View
+          key={`behind-${nextCompanion.id}`}
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, behindStyle]}>
           <CompanionCard
-            key={`active-${currentCompanion.id}`}
+            companion={nextCompanion}
+            heroHeight={heroHeight}
+            isPreview
+            lottieStyle={lottieStyle}
+            overlapOffset={infoPanelOverlap}
+          />
+        </Animated.View>
+
+        {/* Top card — swipeable */}
+        <SwipeableCard
+          key={`top-${currentCompanion.id}`}
+          translateX={translateX}
+          translateY={translateY}
+          screenWidth={screenWidth}
+          onSwipe={handleSwipe}>
+          <CompanionCard
             companion={currentCompanion}
             heroHeight={heroHeight}
             liked={liked}
-            lottieStyle={lottieFrameStyle}
-            onToggleLiked={toggleLiked}
-            panHandlers={panResponder.panHandlers}
+            lottieStyle={lottieStyle}
             overlapOffset={infoPanelOverlap}
-            style={[
-              styles.activeCard,
-              {
-                transform: [{ translateX: swipeX }, { rotate: topCardRotate }],
-              },
-            ]}
+            onToggleLiked={toggleLiked}
           />
-        </View>
+        </SwipeableCard>
+      </View>
 
+      {/* ── Bottom chrome ── */}
+      <View style={styles.bottomSection}>
         <View style={styles.swipeHintRow}>
-          <Feather color={theme.colors.textSub} name="arrow-left" size={16} />
+          <Feather color={theme.colors.textSub} name="arrow-left" size={14} />
           <Text style={styles.swipeHintText}>左右滑动，切换下一位伙伴</Text>
-          <Feather color={theme.colors.textSub} name="arrow-right" size={16} />
+          <Feather color={theme.colors.textSub} name="arrow-right" size={14} />
         </View>
 
         <View style={styles.pagination}>
           {companions.map((item, index) => (
-            <View key={item.id} style={[styles.paginationDot, index === currentIndex && styles.paginationDotActive]} />
+            <View
+              key={item.id}
+              style={[styles.paginationDot, index === currentIndex && styles.paginationDotActive]}
+            />
           ))}
         </View>
-      </ScrollView>
 
-      <View style={styles.primaryButtonDock}>
-        <Pressable accessibilityRole="button" onPress={openCompanion} style={styles.primaryButton}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={openCompanion}
+          style={styles.primaryButton}>
           <Text style={styles.primaryButtonText}>开启陪伴</Text>
           <Feather color={theme.colors.textMain} name="arrow-right" size={22} />
         </Pressable>
