@@ -3,19 +3,19 @@ import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, ViewStyle, useWindowDimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { theme } from '@/constants/theme';
 
-import { CompanionCard } from './components/companion-card';
-import { SwipeableCard } from './components/swipeable-card';
 import { companions, wrapIndex } from './companion-selection.data';
 import { styles } from './companion-selection.styles';
+import { CompanionCard } from './components/companion-card';
+import { SwipeableCard } from './components/swipeable-card';
 
 export function CompanionSelectionScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
@@ -33,22 +33,23 @@ export function CompanionSelectionScreen() {
   const liked = likedIds[currentCompanion.id] ?? false;
 
   // Card area: full width, sits between title and bottom chrome
-  const cardAreaHeight = Math.max(screenHeight * 0.56, 320);
-  const cardWidth = screenWidth; // full bleed
+  const cardAreaHeight = Math.max(screenHeight * 0.58, 392);
+  const cardWidth = Math.min(screenWidth - 34, 430);
 
   // Hero stage takes top portion of card; info panel overlaps from below
-  const heroHeight = Math.round(cardAreaHeight * 0.56);
-  const infoPanelOverlap = Math.round(heroHeight * 0.24);
+  const heroHeight = Math.round(cardAreaHeight * 0.72);
+  const infoPanelOverlap = Math.round(heroHeight * 0.08);
 
   // Lottie is positioned absolute relative to companionCard.
   // It extends ~42% below the heroStage so the character's face shows
   // in the hero area and hands peek over the white info panel.
   const lottieStyle: ViewStyle = {
     position: 'absolute',
-    width: cardWidth,
-    height: heroHeight * 1.42,
-    left: 0,
-    top: 0,
+    width: cardWidth * 1.08,
+    height: heroHeight * 1.56,
+    left: '50%',
+    marginLeft: -(cardWidth * 1.08) / 2,
+    top: -102,
   };
 
   // Behind card animates up / scales in as top card is dragged

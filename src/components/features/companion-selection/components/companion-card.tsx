@@ -48,7 +48,7 @@ export function CompanionCard({
             <Ionicons
               color={theme.colors.white}
               name={liked ? 'heart' : 'heart-outline'}
-              size={24}
+              size={28}
             />
           </Pressable>
         ) : null}
@@ -88,5 +88,6 @@ export function CompanionCard({
 const cardStyles = StyleSheet.create({
   root: {
     justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 });

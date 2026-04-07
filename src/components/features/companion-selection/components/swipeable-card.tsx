@@ -78,5 +78,6 @@ export function SwipeableCard({
 const styles = StyleSheet.create({
   card: {
     zIndex: 10,
+    alignItems: 'center',
   },
 });
