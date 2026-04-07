@@ -177,8 +177,8 @@ export const styles = StyleSheet.create({
   infoPanel: {
     borderTopLeftRadius: 34,
     borderTopRightRadius: 34,
-    borderBottomLeftRadius: 34,
-    borderBottomRightRadius: 34,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     backgroundColor: 'rgba(255,255,255,0.98)',
     paddingHorizontal: 24,
     paddingTop: 6,

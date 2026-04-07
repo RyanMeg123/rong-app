@@ -49,7 +49,7 @@ export function CompanionSelectionScreen() {
     height: heroHeight * 1.56,
     left: '50%',
     marginLeft: -(cardWidth * 1.08) / 2,
-    top: -102,
+    top: -120,
   };
 
   // Behind card animates up / scales in as top card is dragged
